@@ -6,8 +6,8 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 public class Percolation {
     private boolean[][] grid;
     private int n;
-    private int topSite;
-    private int bottomSite;
+    private int topVirtualSite;
+    private int bottomVirtualSite;
     private WeightedQuickUnionUF uf;
     private int numberOfOpenSites;
 
@@ -23,8 +23,8 @@ public class Percolation {
         // connect top row to top virtual site, bottom to bottomSite
         // The elements are named 0 through n–1.
         uf = new WeightedQuickUnionUF(n * n + 2);
-        topSite = n * n; // for example if n = 4 - topSite = 16
-        bottomSite = n * n + 1; // bottomSite = 17
+        topVirtualSite = n * n; // for example if n = 4 - topVirtualSite = 16
+        bottomVirtualSite = n * n + 1; // 17
     }
 
     // opens the site (row, col) if it is not open already
@@ -42,20 +42,14 @@ public class Percolation {
         numberOfOpenSites++;
 
         // connect to open neighbours
-        if (row + 1 <= n && isOpen(row + 1, col))
-            uf.union(getId(row, col), getId(row + 1, col));
-        if (col + 1 <= n && isOpen(row, col + 1))
-            uf.union(getId(row, col), getId(row, col + 1));
-        if (row - 1 >= 1 && isOpen(row - 1, col))
-            uf.union(getId(row, col), getId(row - 1, col));
-        if (col - 1 >= 1 && isOpen(row, col - 1))
-            uf.union(getId(row, col), getId(row, col - 1));
+        if (row + 1 <= n && isOpen(row + 1, col)) uf.union(getId(row, col), getId(row + 1, col));
+        if (col + 1 <= n && isOpen(row, col + 1)) uf.union(getId(row, col), getId(row, col + 1));
+        if (row - 1 >= 1 && isOpen(row - 1, col)) uf.union(getId(row, col), getId(row - 1, col));
+        if (col - 1 >= 1 && isOpen(row, col - 1)) uf.union(getId(row, col), getId(row, col - 1));
 
-        // connect to virtual top and bottom
+        // connect to virtual top
         if (row == 1)
-            uf.union(getId(row, col), topSite);
-        if (row == n && isFull(row, col)) // otherwise isFull will work wrong for percolated system
-            uf.union(getId(row, col), bottomSite);
+            uf.union(getId(row, col), topVirtualSite);
     }
 
 
@@ -77,7 +71,7 @@ public class Percolation {
         }
         // A full site is an open site that can be connected to an open site in the top row
         boolean isFull = false;
-        if (isOpen(row, col) && uf.find(topSite) == uf.find(getId(row, col))) {
+        if (isOpen(row, col) && uf.find(topVirtualSite) == uf.find(getId(row, col))) {
             isFull = true;
         }
         return isFull;
@@ -96,7 +90,18 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        return uf.find(topSite) == uf.find(bottomSite);
+        if (uf.find(topVirtualSite) == uf.find(bottomVirtualSite)) {
+            return true;
+        }
+
+        for (int i = 1; i <= n; i++) {
+            if (isOpen(n, i) && uf.find(topVirtualSite) == uf.find(getId(n, i))) {
+                uf.union(getId(n, i), bottomVirtualSite);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // test client (optional)
