@@ -1,14 +1,14 @@
 // Performance requirements.  The constructor must take time proportional to n2; all instance methods must take constant time plus a constant number
 // of calls to union() and find().
 
-import edu.princeton.cs.algs4.QuickFindUF;
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
     private boolean[][] grid;
     private int n;
     private int topSite;
     private int bottomSite;
-    private QuickFindUF uf;
+    private WeightedQuickUnionUF uf;
     private int numberOfOpenSites;
 
     // creates n-by-n grid, with all sites initially blocked
@@ -22,13 +22,9 @@ public class Percolation {
 
         // connect top row to top virtual site, bottom to bottomSite
         // The elements are named 0 through n–1.
-        uf = new QuickFindUF(n * n + 2);
+        uf = new WeightedQuickUnionUF(n * n + 2);
         topSite = n * n; // for example if n = 4 - topSite = 16
         bottomSite = n * n + 1; // bottomSite = 17
-        for (int i = 1; i <= n; i++) {
-            uf.union(topSite, getId(1, i));
-            uf.union(bottomSite, getId(n, i));
-        }
     }
 
     // opens the site (row, col) if it is not open already
@@ -55,6 +51,11 @@ public class Percolation {
         if (col - 1 >= 1 && isOpen(row, col - 1))
             uf.union(getId(row, col), getId(row, col - 1));
 
+        // connect to virtual top and bottom
+        if (row == 1)
+            uf.union(getId(row, col), topSite);
+        if (row == n && isFull(row, col)) // otherwise isFull will work wrong for percolated system
+            uf.union(getId(row, col), bottomSite);
     }
 
 
@@ -75,7 +76,11 @@ public class Percolation {
                     "row and column indices are integers between 1 and n");
         }
         // A full site is an open site that can be connected to an open site in the top row
-        return uf.find(topSite) == uf.find(getId(row, col));
+        boolean isFull = false;
+        if (isOpen(row, col) && uf.find(topSite) == uf.find(getId(row, col))) {
+            isFull = true;
+        }
+        return isFull;
     }
 
     // get id of cell

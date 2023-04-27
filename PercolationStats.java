@@ -1,4 +1,5 @@
-// https://coursera.cs.princeton.edu/algs4/assignments/percolation/specification.php
+// specification: https://coursera.cs.princeton.edu/algs4/assignments/percolation/specification.php
+// tests: https://github.com/DanielOchoa/percolation-problem
 
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
