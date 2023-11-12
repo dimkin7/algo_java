@@ -40,6 +40,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
 
         public Item next() {
+            if (!hasNext()) {
+                throw new java.util.NoSuchElementException();
+            }
+
             int index = indexArray[cur++];
             return array[index];
         }
@@ -69,6 +73,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // add the item
     public void enqueue(Item item) {
+        if (item == null) {
+            throw new IllegalArgumentException();
+        }
+
         // double size if not enough
         if (size == array.length) {
             changeArrayLength(array.length * 2);
@@ -78,8 +86,13 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // remove and return a random item
     public Item dequeue() {
+        if (isEmpty()) {
+            throw new java.util.NoSuchElementException();
+        }
+
         StdRandom.shuffle(array, 0, size);
         Item res = array[size - 1];
+        array[size - 1] = null;
         size--;
 
         // not allow loitering
@@ -93,6 +106,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // return a random item (but do not remove it)
     public Item sample() {
+        if (isEmpty()) {
+            throw new java.util.NoSuchElementException();
+        }
+
         int index = StdRandom.uniformInt(size);
         return array[index];
     }
@@ -104,16 +121,18 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // unit testing (required)
     public static void main(String[] args) {
-        RandomizedQueue<String> q = new RandomizedQueue<>();
+        RandomizedQueue<String> rq = new RandomizedQueue<>();
+        rq.enqueue("RPDZITTIGJ");
+        rq.dequeue();
 
-        q.enqueue("A");
-        q.enqueue("B");
-        q.enqueue("C");
-        q.enqueue("D");
-        q.enqueue("e");
-        q.enqueue("f");
+        // q.enqueue("A");
+        // q.enqueue("B");
+        // q.enqueue("C");
+        // q.enqueue("D");
+        // q.enqueue("e");
+        // q.enqueue("f");
 
-        for (String s : q) {
+        for (String s : rq) {
             StdOut.println(s);
         }
 

@@ -112,10 +112,14 @@ public class Deque<Item> implements Iterable<Item> {
 
         Item res = first.item;
         first = first.next;
-        size--;
         if (first == null) {
             last = null;
         }
+        else {
+            first.prev = null;
+        }
+
+        size--;
         return res;
     }
 
@@ -127,10 +131,13 @@ public class Deque<Item> implements Iterable<Item> {
 
         Item res = last.item;
         last = last.prev;
-        size--;
         if (last == null) {
             first = null;
         }
+        else {
+            last.next = null;
+        }
+        size--;
         return res;
     }
 
@@ -141,23 +148,41 @@ public class Deque<Item> implements Iterable<Item> {
 
     // unit testing (required)
     public static void main(String[] args) {
-        Deque<String> deque = new Deque<>();
+        Deque<Integer> deque = new Deque<>();
 
-        deque.addFirst("a");
-        deque.addFirst("b");
-        deque.addFirst("c");
-        deque.addLast("d");
-        deque.addLast("e");
-        deque.addLast("f");
+        // deque.addFirst("a");
+        // deque.addFirst("b");
+        // deque.addFirst("c");
+        // deque.addLast("d");
+        // deque.addLast("e");
+        // deque.addLast("f");
 
-        Iterator<String> iter = deque.iterator();
-        while (iter.hasNext()) {
-            System.out.println(iter.next());
-        }
+        deque.addFirst(1);
+        deque.print();
+        deque.addFirst(2);
+        deque.print();
+        deque.addLast(3);
+        deque.print();
+        deque.addFirst(4);
+        deque.print();
+        deque.removeLast();
+        deque.print();
 
-        System.out.println(deque.size());
+        // System.out.println(deque.size());
 
     }
 
+    private void print() {
+        Iterator<Item> iter = iterator();
+        System.out.print("[");
+        while (iter.hasNext()) {
+            System.out.print(iter.next());
+            if (iter.hasNext()) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
+
+    }
 
 }
