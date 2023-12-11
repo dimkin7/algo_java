@@ -11,7 +11,6 @@ import edu.princeton.cs.algs4.StdOut;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class FastCollinearPoints {
@@ -21,34 +20,45 @@ public class FastCollinearPoints {
     public FastCollinearPoints(
             Point[] points) {
 
-        HashMap<Point, Double> segmentsFound = new HashMap<>();
-
         // Corner cases. Throw an IllegalArgumentException if the argument to the constructor is null, if any point in the array is null, or if the argument to the constructor contains a repeated point.
         if (points == null) {
             throw new IllegalArgumentException("points == null");
         }
 
-        Arrays.sort(points); // иначе если на одной прямой будут различаться на + и -
+        Point[] pointsSorted = new Point[points.length];
+
+        for (int i = 0; i < points.length; i++) {
+            if (points[i] == null) {
+                throw new IllegalArgumentException("point == null");
+            }
+            pointsSorted[i] = points[i];
+        }
+
+        Arrays.sort(pointsSorted); // prepare data for speed
 
         segments = new ArrayList<>();
-        for (int i1 = 0; i1 < points.length - 3; i1++) {
-            Point p = points[i1];
+        for (int i1 = 0; i1 < pointsSorted.length; i1++) {
+            Point p = pointsSorted[i1];
             if (p == null) { // if any point in the array is null
                 throw new IllegalArgumentException("point == null");
             }
 
             // набираем оставшиеся точки
             List<Point> q = new ArrayList<>();
-            for (int i2 = i1 + 1; i2 < points.length; i2++) {
-                if (points[i2]
+            for (int i2 = 0; i2 < pointsSorted.length; i2++) {
+                if (i1 == i2) {
+                    continue;
+                }
+
+                if (pointsSorted[i2]
                         == null) { // or if the argument to the constructor contains a repeated point.
                     throw new IllegalArgumentException("point == null");
                 }
-                if (p.compareTo(points[i2]) == 0) {
+                if (p.compareTo(pointsSorted[i2]) == 0) {
                     throw new IllegalArgumentException("repeated point");
                 }
 
-                q.add(points[i2]);
+                q.add(pointsSorted[i2]);
             }
             // сортируем
             q.sort(p.slopeOrder());
@@ -60,7 +70,7 @@ public class FastCollinearPoints {
 
             for (int i = 0; i < q.size(); i++) {
                 if (i == 0 || p.slopeTo(q.get(i)) != prevSlope) {
-                    addSegment(same, segmentsFound, prevSlope);
+                    addSegment(same, p);
 
                     same.clear();
                     same.add(p);
@@ -73,26 +83,24 @@ public class FastCollinearPoints {
             }
 
             // and last loop
-            addSegment(same, segmentsFound, prevSlope);
+            addSegment(same, p);
         }
 
     }
 
-    private void addSegment(List<Point> same, HashMap<Point, Double> segmentsFound,
-                            double prevSlope) {
+    private void addSegment(List<Point> same, Point p) {
         if (same.size() < 4) {
             return;
         }
 
         Collections.sort(same);
-        Point lastPoint = same.get(same.size() - 1);
-
-        if (segmentsFound.containsKey(lastPoint) && segmentsFound.get(lastPoint) == prevSlope) {
+        // добавляем только сегменты начинающиеся из начальной точки
+        if (p != same.get(0)) {
             return;
         }
 
+        Point lastPoint = same.get(same.size() - 1);
         segments.add(new LineSegment(same.get(0), lastPoint));
-        segmentsFound.put(lastPoint, prevSlope);
     }
 
     // the number of line segments
@@ -116,12 +124,18 @@ public class FastCollinearPoints {
             points[i] = new Point(x, y);
         }
 
+        // Point[] points = new Point[2];
+        // points[0] = null;
+        // points[1] = new Point(1, 2);
+
         // draw the points
         StdDraw.enableDoubleBuffering();
         StdDraw.setXscale(0, 32768);
         StdDraw.setYscale(0, 32768);
         for (Point p : points) {
-            p.draw();
+            if (p != null) {
+                p.draw();
+            }
         }
         StdDraw.show();
 
